@@ -1,7 +1,8 @@
+
 const socket = io();
 const myvideo = document.querySelector("#vd1");
 const roomid = params.get("room");
-let username;
+const userrole = params.get('userrole');
 const chatRoom = document.querySelector('.chat-cont');
 const sendButton = document.querySelector('.chat-send');
 const messageField = document.querySelector('.chat-input');
@@ -32,6 +33,11 @@ let drawsize = 3;
 let colorRemote = "black";
 let drawsizeRemote = 3;
 
+// modal close 
+function closeModal() {
+    $('#myModal').modal('hide');
+}
+
 function fitToContainer(canvas) {
     canvas.style.width = '100%';
     canvas.style.height = '100%';
@@ -51,7 +57,7 @@ socket.on('getCanvas', url => {
         ctx.drawImage(img, 0, 0);
     }
 
-    console.log('got canvas', url)
+    // console.log('got canvas', url)
 })
 
 function setColor(newcolor) {
@@ -190,7 +196,7 @@ function CopyClassText() {
     }
 
     document.querySelector(".copycode-button").textContent = "Copied!"
-    setTimeout(()=>{
+    setTimeout(() => {
         document.querySelector(".copycode-button").textContent = "Copy Code";
     }, 5000);
 }
@@ -226,14 +232,19 @@ let peerConnection;
 function handleGetUserMediaError(e) {
     switch (e.name) {
         case "NotFoundError":
-            alert("Unable to open your call because no camera and/or microphone" +
+            $('#myModal').modal('show');
+            $("#modalBody").html("Unable to open your call because no camera and/or microphone" +
                 "were found.");
+            // alert("Unable to open your call because no camera and/or microphone" +
+            //     "were found.");
             break;
         case "SecurityError":
         case "PermissionDeniedError":
             break;
         default:
-            alert("Error opening your camera and/or microphone: " + e.message);
+            // alert("Error opening your camera and/or microphone: " + e.message);
+            $('#myModal').modal('show');
+            $("#modalBody").html("Error opening your camera and/or microphone: " + e.message);
             break;
     }
 
@@ -434,21 +445,23 @@ function screenShareToggle() {
             }
             myscreenshare.getVideoTracks()[0].enabled = true;
             const newStream = new MediaStream([
-                myscreenshare.getVideoTracks()[0], 
+                myscreenshare.getVideoTracks()[0],
             ]);
             myvideo.srcObject = newStream;
             myvideo.muted = true;
             mystream = newStream;
-            screenShareButt.innerHTML = (screenshareEnabled 
-                ? `<i class="fas fa-desktop"></i><span class="tooltiptext">Stop Share Screen</span>`
-                : `<i class="fas fa-desktop"></i><span class="tooltiptext">Share Screen</span>`
+            screenShareButt.innerHTML = (screenshareEnabled
+                ? `<i class="fas fa-desktop"></i>`
+                : `<i class="fas fa-desktop"></i>`
             );
-            myscreenshare.getVideoTracks()[0].onended = function() {
+            myscreenshare.getVideoTracks()[0].onended = function () {
                 if (screenshareEnabled) screenShareToggle();
             };
         })
         .catch((e) => {
-            alert("Unable to share screen:" + e.message);
+            // alert("Unable to share screen:" + e.message);
+            $('#myModal').modal('show');
+            $("#modalBody").html("Unable to share screen:" + e.message);
             console.error(e);
         });
 }
@@ -630,7 +643,7 @@ videoButt.addEventListener('click', () => {
         }
         videoButt.innerHTML = `<i class="fas fa-video"></i>`;
         videoAllowed = 1;
-        videoButt.style.backgroundColor = "#4ECCA3";
+        videoButt.style.backgroundColor = "#8db319";
         if (mystream) {
             mystream.getTracks().forEach(track => {
                 if (track.kind === 'video')
@@ -672,7 +685,7 @@ audioButt.addEventListener('click', () => {
         }
         audioButt.innerHTML = `<i class="fas fa-microphone"></i>`;
         audioAllowed = 1;
-        audioButt.style.backgroundColor = "#4ECCA3";
+        audioButt.style.backgroundColor = "#8db319";
         if (mystream) {
             mystream.getTracks().forEach(track => {
                 if (track.kind === 'audio')
